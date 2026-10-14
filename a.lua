@@ -17786,6 +17786,10 @@ task.spawn(function(toggles, tbl15)
 		return true
 	end
 
+	local function getHRP(char)
+		return char and (char:FindFirstChild("saviHRP") or char:FindFirstChild("HumanoidRootPart"))
+	end
+
 	-- ===== Jet: 相手のキャラクターに見た目だけのJetを付ける =====
 	local function getTemplate()
 		if template then
@@ -17843,7 +17847,7 @@ task.spawn(function(toggles, tbl15)
 		local g = { model = model }
 		Sync.Jets[p] = g
 		g.conn = RunService.Heartbeat:Connect(function()
-			local hrp = p.Character and p.Character:FindFirstChild("HumanoidRootPart")
+			local hrp = getHRP(p.Character)
 			if hrp then
 				model:PivotTo(hrp.CFrame * JET_OFFSET)
 				if model.Parent ~= ghostFolder then
@@ -17854,6 +17858,219 @@ task.spawn(function(toggles, tbl15)
 			end
 		end)
 		log("jet ghost on:", p.Name)
+	end
+
+	-- ===== Boat: 乗っている人のキャラクターに合わせて、手元のボートを動かす =====
+	local MAPNAME = "OSUSHIRAMAP"
+	local boatModels = {} -- id -> モデル(読み込み位置から決まるIDなので全員同じ)
+	local firstSeen = setmetatable({}, { __mode = "k" })
+	local followers = {} -- Player -> { id, rel, root, backup }
+	local myBoat = nil -- 自分が乗っているボート { id, root, t }
+	Sync.Boats = followers
+
+	local function boatRoot(model)
+		if not model or not model.Parent then
+			return nil
+		end
+		if model.Name == "Boat Spawner" then
+			local ok, b = pcall(function()
+				return model.Vehicle.Vehicle.Vehicle.boat
+			end)
+			return ok and b or nil
+		end
+		return model
+	end
+
+	local function scanBoats()
+		local folder = workspace:FindFirstChild(MAPNAME)
+		if not folder then
+			return
+		end
+		local now = os.clock()
+		for _, m in ipairs(folder:GetChildren()) do
+			if (m.Name == "Boat Spawner" or m.Name == "Boat") and m:IsA("PVInstance") then
+				local id = m:GetAttribute("_osuBoatId")
+				if not id then
+					firstSeen[m] = firstSeen[m] or now
+					if now - firstSeen[m] > 1 then -- 配置が終わってから、初期位置でIDを決める
+						local pos = m:GetPivot().Position
+						id = string.format("%s:%d:%d", m.Name, math.floor(pos.X / 4), math.floor(pos.Z / 4))
+						m:SetAttribute("_osuBoatId", id)
+					end
+				end
+				if id then
+					boatModels[id] = m
+				end
+			end
+		end
+	end
+
+	local function encodeCF(cf)
+		return { cf:GetComponents() }
+	end
+
+	local function decodeCF(t)
+		if typeof(t) ~= "table" or #t ~= 12 then
+			return nil
+		end
+		for i = 1, 12 do
+			local v = t[i]
+			if typeof(v) ~= "number" or v ~= v or math.abs(v) > 100000 then
+				return nil
+			end
+		end
+		local right = Vector3.new(t[4], t[7], t[10])
+		local up = Vector3.new(t[5], t[8], t[11])
+		if math.abs(right.Magnitude - 1) > 0.05 or math.abs(up.Magnitude - 1) > 0.05 then
+			return nil
+		end
+		return CFrame.fromMatrix(Vector3.new(t[1], t[2], t[3]), right, up)
+	end
+
+	local function lockBoat(root) -- 追従中は物理を止めて、位置だけを合わせる
+		local b = {}
+		local function lock(part)
+			if part:IsA("BasePart") then
+				b[part] = part.Anchored
+				part.Anchored = true
+			end
+		end
+		lock(root)
+		for _, d in ipairs(root:GetDescendants()) do
+			lock(d)
+		end
+		return b
+	end
+
+	local function unlockBoat(b)
+		for part, was in pairs(b) do
+			if part.Parent then
+				part.Anchored = was
+			end
+		end
+	end
+
+	local function stopFollow(p, finalCF)
+		local f = followers[p]
+		followers[p] = nil
+		if not f then
+			return
+		end
+		if f.root and f.root.Parent and finalCF then
+			pcall(function()
+				f.root:PivotTo(finalCF) -- 降りた場所にボートを残す
+			end)
+		end
+		if f.backup then
+			unlockBoat(f.backup)
+		end
+	end
+
+	local function startFollow(p, id, rel)
+		if p == LP or (myBoat and myBoat.id == id) then
+			return
+		end
+		local cur = followers[p]
+		if cur then
+			if cur.id == id then
+				cur.rel = rel
+				return
+			end
+			stopFollow(p, nil)
+		end
+		for _, g in pairs(followers) do
+			if g.id == id then
+				return -- 同じボートは1人の動きだけに合わせる
+			end
+		end
+		followers[p] = { id = id, rel = rel }
+	end
+
+	local boatConn = RunService.Heartbeat:Connect(function()
+		for p, f in pairs(followers) do
+			local hrp = getHRP(p.Character)
+			local root = boatRoot(boatModels[f.id])
+			if root ~= f.root then -- ボートが作り直されたら付け替える
+				if f.backup then
+					unlockBoat(f.backup)
+				end
+				f.root = root
+				f.backup = root and lockBoat(root) or nil
+			end
+			if hrp and root then
+				root:PivotTo(hrp.CFrame * f.rel)
+			end
+		end
+	end)
+
+	-- 自分側: 乗っているボートを調べる
+	local function currentBoat()
+		local char = LP.Character
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
+		local seat = hum and hum.SeatPart
+		local folder = workspace:FindFirstChild(MAPNAME)
+		if not seat or not folder then
+			return nil
+		end
+		local m = seat
+		while m and m.Parent ~= folder do
+			m = m.Parent
+		end
+		if not m then
+			return nil
+		end
+		local id = m:GetAttribute("_osuBoatId")
+		local root = boatRoot(m)
+		if not id or not root then
+			return nil
+		end
+		return id, root
+	end
+
+	local function boatState() -- 途中参加の人への返事に載せる
+		if not myBoat or not myBoat.root or not myBoat.root.Parent then
+			return nil
+		end
+		local hrp = getHRP(LP.Character)
+		if not hrp then
+			return nil
+		end
+		return { id = myBoat.id, rel = encodeCF(hrp.CFrame:ToObjectSpace(myBoat.root:GetPivot())) }
+	end
+
+	local function sendBoatOff()
+		local b = myBoat
+		myBoat = nil
+		if not b then
+			return
+		end
+		local cf = nil
+		if b.root and b.root.Parent then
+			pcall(function()
+				cf = b.root:GetPivot()
+			end)
+		end
+		send({ kind = "boat", id = b.id, on = false, cf = cf and encodeCF(cf) or nil })
+	end
+
+	local function syncBoat(now)
+		local id, root = currentBoat()
+		if id then
+			local hrp = getHRP(LP.Character)
+			if hrp then
+				if not myBoat or myBoat.id ~= id then
+					sendBoatOff()
+					myBoat = { id = id, root = root, t = 0 }
+				end
+				myBoat.root = root
+				if now - myBoat.t > 1.5 then -- 乗っている間も定期的にずれを直す
+					myBoat.t = now
+					send({ kind = "boat", id = id, on = true, rel = encodeCF(hrp.CFrame:ToObjectSpace(root:GetPivot())) })
+				end
+			end
+		elseif myBoat then
+			sendBoatOff()
+		end
 	end
 
 	-- ===== 受信 =====
@@ -17896,7 +18113,7 @@ task.spawn(function(toggles, tbl15)
 				end
 			end
 			log("hello from", sender.Name)
-			send({ kind = "here", keys = keys, jet = Sync.MyJet })
+			send({ kind = "here", keys = keys, jet = Sync.MyJet, boat = boatState() })
 		elseif kind == "here" then
 			Sync.Peers[sender] = true
 			log("here from", sender.Name)
@@ -17913,10 +18130,32 @@ task.spawn(function(toggles, tbl15)
 			if data.jet == true then
 				addGhost(sender)
 			end
+			if typeof(data.boat) == "table" and typeof(data.boat.id) == "string" and boatModels[data.boat.id] then
+				local rel = decodeCF(data.boat.rel)
+				if rel then
+					startFollow(sender, data.boat.id, rel)
+				end
+			end
 		elseif kind == "world" then
 			Sync.Peers[sender] = true
 			if typeof(data.key) == "string" and WORLD[data.key] and typeof(data.on) == "boolean" then
 				applyWorld(data.key, data.on)
+			end
+		elseif kind == "boat" then
+			Sync.Peers[sender] = true
+			local id = data.id
+			if typeof(id) == "string" and #id <= 64 and boatModels[id] then
+				if data.on == true then
+					local rel = decodeCF(data.rel)
+					if rel then
+						startFollow(sender, id, rel)
+					end
+				elseif data.on == false then
+					local f = followers[sender]
+					if f and f.id == id then
+						stopFollow(sender, decodeCF(data.cf))
+					end
+				end
 			end
 		elseif kind == "jet" then
 			Sync.Peers[sender] = true
@@ -17931,16 +18170,29 @@ task.spawn(function(toggles, tbl15)
 	table.insert(conns, remote.OnClientEvent:Connect(onMessage))
 	table.insert(conns, Players.PlayerRemoving:Connect(function(p)
 		removeGhost(p)
+		stopFollow(p, nil)
 		Sync.Peers[p] = nil
 		Sync._last[p] = nil
 	end))
 
 	-- ===== 公開API =====
 	function Sync.SetEnabled(v)
-		Sync.Enabled = v and true or false
-		if not Sync.Enabled then
+		v = v and true or false
+		if not v and Sync.Enabled then
+			-- 切る前に、自分のJet/ボートが相手側に残らないよう降りたことを伝える
+			sendBoatOff()
+			if Sync.MyJet then
+				Sync.MyJet = false
+				send({ kind = "jet", on = false })
+			end
+		end
+		Sync.Enabled = v
+		if not v then
 			for p in pairs(Sync.Jets) do
 				removeGhost(p)
+			end
+			for p in pairs(followers) do
+				stopFollow(p, nil)
 			end
 		end
 	end
@@ -17955,8 +18207,16 @@ task.spawn(function(toggles, tbl15)
 
 	function Sync.Stop()
 		Sync.Alive = false
+		pcall(sendBoatOff)
+		if Sync.MyJet then
+			pcall(send, { kind = "jet", on = false })
+		end
 		for _, c in ipairs(conns) do
 			c:Disconnect()
+		end
+		boatConn:Disconnect()
+		for p in pairs(followers) do
+			stopFollow(p, nil)
 		end
 		for p in pairs(Sync.Jets) do
 			removeGhost(p)
@@ -17987,6 +18247,8 @@ task.spawn(function(toggles, tbl15)
 	while Sync.Alive do
 		task.wait(0.2)
 		if Sync.Enabled then
+			scanBoats()
+			syncBoat(os.clock())
 			for key, name in pairs(WORLD) do
 				local tg = toggles[name]
 				if tg and tg.Value ~= state[key] then
