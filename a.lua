@@ -1,5 +1,6 @@
 local WL_RELOAD_URL = "https://raw.githubusercontent.com/ujedkokdwolqpaqaza112/gt/refs/heads/main/a.lua"
 
+
 queue_on_teleport = queue_on_teleport or function() end
 cloneref = cloneref or function(o) return o end
 clonefunction = clonefunction or function(f) return f end
