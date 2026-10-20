@@ -1,3 +1,30 @@
+local WL_SHEET_ID = "1_Qoyk9qUXE-Yl5lzjQLRmKS9VoJ1eGrcYgUXkaohIaw"
+local WL_GID = "0"
+local WL_RELOAD_URL = "https://raw.githubusercontent.com/ujedkokdwolqpaqaza112/gt/refs/heads/main/a.lua"
+
+do
+	if not game:IsLoaded() then game.Loaded:Wait() end
+	local lp = game:GetService("Players").LocalPlayer
+	local req = request or http_request or (syn and syn.request)
+	local allowed = false
+	local ok, res = pcall(req, {
+		Url = ("https://docs.google.com/spreadsheets/d/%s/export?format=csv&gid=%s"):format(WL_SHEET_ID, WL_GID),
+		Method = "GET",
+	})
+	if ok and res and res.Success then
+		for line in res.Body:gmatch("[^\r\n]+") do
+			local id = line:match("^%s*\"?(%d+)\"?")
+			if id and tonumber(id) == lp.UserId then
+				allowed = true
+				break
+			end
+		end
+	end
+	if not allowed then
+		lp:Kick("Not whitelisted")
+		return
+	end
+end
 queue_on_teleport = queue_on_teleport or function() end
 cloneref = cloneref or function(o) return o end
 clonefunction = clonefunction or function(f) return f end
@@ -56,11 +83,14 @@ if true then
 		end,
 	}
 
-	if getgenv()._SCRIPT_LOADED then
-		getgenv()._NOTIFICATION_CENTER:SendNotif("OSUSHIRA", "Already loaded! Unload the current script to run it again.", "rbxassetid://107060501870260", 3, "rbxassetid://97643101798871", 0.8, 1)
-		return
-	end
-	getgenv()._SCRIPT_LOADED = true
+    if getgenv()._SCRIPT_LOADED then
+        getgenv()._NOTIFICATION_CENTER:SendNotif("OSUSHIRA", "読み込み済み。二重読み込みは殺す。", "rbxassetid://107060501870260", 3, "rbxassetid://97643101798871", 0.8, 1)
+        return
+    end
+
+    getgenv()._SCRIPT_LOADED = true
+    getgenv()._NOTIFICATION_CENTER:SendNotif("OSUSHIRA", "Made in Japan. ちんこかゆすぎ。", "rbxassetid://107060501870260", 3, "rbxassetid://97643101798871", 0.8, 1)
+
 
 	local defaultColors = {
 		MainColor = "262729",
@@ -2309,7 +2339,7 @@ if true then
 							local v33 = lib:CreateWindow({
 								Title = "<b>OSUSHIRA</b>",
 								Icon = 107060501870260,
-								Footer = "<b>OSUSHIRA | v4.649</b>",
+								Footer = "<b>OSUSHIRA | v5.0</b>",
 								Font = Enum.Font.Gotham,
 								NotifySide = "Right",
 								ShowCustomCursor = true,
@@ -2381,7 +2411,7 @@ if true then
 									return ((localPlayer3 and localPlayer3.DisplayName or localPlayer3 and localPlayer3.Name or "Player"):gsub("<[^>]->", ""))
 								end
 
-								local str2 = "OSUSHIRA | v4.649"
+								local str2 = "OSUSHIRA | v5.0"
 								local tbl15 = {}
 								local flag10 = false
 
@@ -2389,21 +2419,22 @@ if true then
 									local v34 = fn22()
 
 									local tbl16 = {
-										"It will all pass with time, " .. v34 .. ".",
-										"You're stronger than you think, " .. v34 .. ".",
-										"Everything is going to be okay, " .. v34 .. ".",
-										"Proud of you for keeping on, " .. v34 .. ".",
-										"One day at a time, " .. v34 .. ".",
-										"You're never truly alone, " .. v34 .. ".",
-										"You matter more than you realize, " .. v34 .. ".",
-										"Everything will be alright.",
-										"It gets better with time.",
-										"Storms don't last forever.",
-										"The sun will rise again tomorrow.",
+										"時間が経てば全部どうでもよくなるよ。",
+										v34 .. "のくせに、自分が思うよりしぶといじゃねえか。殺す",
+										"なんだかんだ全部うまくいくって、" .. v34 .. "も。",
+										"ここまでよく死なずに生きてこれたな、" .. v34 .. "の分際で。稲邉が通過します。",
+										"一日ずつ適当に生きて前から車界隈にお前はなる。",
+										v34 .. "、お前は決して一人じゃないぞ。",
+										v34 .. "、お前は自分が思っている以上にでかい存在感がある。",
+										"まぁなんとかなるんじゃね？",
+										"時間が経てばマシになる。つまり増岡。",
+										"やまない雨はないという間違った情報を訂正。雨雲があって雨が降るため、雨雲がなくなればやみます。クソが。",
+										"明日もまたクソみたいな太陽が昇るよ。Minecraftすぎル♡",
 									}
 
+
 									if not flag10 then
-										table.insert(tbl16, 1, "Are you okay, " .. v34 .. "?")
+										table.insert(tbl16, 1, .. v34 .. "、大丈夫か？")
 									end
 
 									local n17 = tonumber(os.date("%H")) or 0
@@ -2411,19 +2442,20 @@ if true then
 
 									if n17 >= 0 and n17 < 6 then
 										local tbl17 = {
-											"It's " .. v35 .. ", you should get some sleep, " .. v34 .. ".",
-											"It's getting late, " .. v34 .. ". Go to Sleep.",
-											"Why are you still awake at " .. v35 .. ", " .. v34 .. "?",
-											"Your thoughts can rest now, " .. v34 .. ". Try to sleep.",
-											"It's " .. v35 .. ". You should sleep.",
-											"Don't stay up too late, its " .. v35 .. ". You need rest.",
-											"It's " .. v35 .. ", please take care of yourself and sleep.",
-											"She was just a dream.",
-											"Stop thinking, go to sleep.",
+											"もう" .. v35 .. "だよ。とっとと寝ろ" .. v34 .. "、このボケが。",
+											.. v34 .. "、もう夜遅いよ。早く寝なさいボケ。",
+											"もう" .. v35 .. "だよ。" .. v34 .. "なんでまだ起きてんの？わら",
+											"おい" .. v34 .. "、もう休めよ。寝ろ。殺す。クソアマ。",
+											"もう" .. v35 .. ". だよ。即座に寝ろ。殺させていただきます。",
+											"あまり夜更かししすぎないで。もう" .. v35 .. "だよ。電気をガンガンにつけて、冷房または暖房を作動させろ。",
+											"もう" .. v35 .. "だよ。はよ電気消して寝ろ。親がぶちぎれるぞ。アマ。",
+											"夢を見ていた。内容は稲邉富美代が男になって文雄になった。",
+											"はよねろやwwwwwwww",
+											"せっくすする？",
 										}
 
 										if not flag10 then
-											table.insert(tbl17, 1, "Are you okay, " .. v34 .. "?")
+											table.insert(tbl17, 1, "おい" .. v34 .. "、大丈夫❓")
 										end
 
 										if math.random(1, 100) <= 80 then
@@ -2450,7 +2482,7 @@ if true then
 
 									local flag11 = #tbl17 > 0 and tbl17[math.random(1, #tbl17)] or tbl16[math.random(1, #tbl16)]
 
-									if flag11:find("Are you okay") then
+									if flag11:find("大丈夫か") then
 										flag10 = true
 									end
 
@@ -2634,7 +2666,7 @@ if true then
 								task.spawn(function()
 									task.wait(1)
 									fn24()
-									fn26("OSUSHIRA | v4.649")
+									fn26("OSUSHIRA | v5.0")
 								end)
 
 								task.wait(6)
@@ -2665,7 +2697,7 @@ if true then
 											if not lib.Unloaded then
 												for i = #str2, 0, -1 do
 													if not lib.Unloaded then
-														fn26(("OSUSHIRA | v4.649"):sub(1, i))
+														fn26(("OSUSHIRA | v5.0"):sub(1, i))
 														task.wait(0.015)
 														continue
 													end
@@ -2699,7 +2731,7 @@ if true then
 													fn26(v35)
 												end
 
-												local flag11 = v35:find("Are you okay") ~= nil
+												local flag11 = v35:find("大丈夫か") ~= nil
 												local v37 = nil
 
 												if flag11 and not lib.Unloaded then
@@ -2723,7 +2755,7 @@ if true then
 
 												if flag11 then
 													if v37 == "yes" and not lib.Unloaded then
-														local str3 = "Glad to hear that, " .. v36 .. ". Keep shining."
+														local str3 = "それを聞けてよかったよ。ずっと輝いとけ。まるで富美代のように。"
 
 														for i = #v35, 0, -1 do
 															if not lib.Unloaded then
@@ -2773,7 +2805,7 @@ if true then
 
 														for i = 1, 21 do
 															if not lib.Unloaded then
-																fn26(("But will you be okay?"):sub(1, i))
+																fn26(("でもお前は大丈夫になる？"):sub(1, i))
 																task.wait(0.035)
 																continue
 															end
@@ -2786,11 +2818,11 @@ if true then
 														if not lib.Unloaded then
 															fn26("")
 															task.wait(0.38)
-															fn26("But will you be okay?")
+															fn26("でもお前は大丈夫になる？")
 															task.wait(0.2)
 															fn26("")
 															task.wait(0.18)
-															fn26("But will you be okay?")
+															fn26("でもお前は大丈夫になる？")
 														end
 
 														local v38 = nil
@@ -2798,7 +2830,7 @@ if true then
 														if not lib.Unloaded then
 															local v39 = fn25(function(arg)
 																v38 = arg
-															end, "But will you be okay?")
+															end, "でもお前は大丈夫になる？")
 
 															local n17 = 0
 
@@ -2815,19 +2847,19 @@ if true then
 														local str3
 
 														if v38 == "yes" then
-															str3 = "Hold on to that light. Even the heaviest storms run out of rain."
+															str3 = "その開發光を絶対に離すな。どんなに激しい嵐だろうと、いつかは雨が止むんだからな。"
 														else
-															str3 = "You don't have to carry the whole world today. Just take it one breath at a time."
+															str3 = "お前が世界を背負い込む必要なんてないんだよ。一呼吸ずつ適当にいこうや。あ、やばい、呼吸困難。死ぬ、ゥ"
 
 															if v38 == "no" then
-																str3 = "Yes, you will. You are far stronger than you think. Don't give up."
+																str3 = "そうなるよ。お前が思っているより、お前はずっと強いんだからな。諦めるな。（稲邉海岸駅駅長静岡県の榛原総合病院院長より)"
 															end
 														end
 
 														if not lib.Unloaded then
 															for i = 21, 0, -1 do
 																if not lib.Unloaded then
-																	fn26(("But will you be okay?"):sub(1, i))
+																	fn26(("でもお前は大丈夫になる？"):sub(1, i))
 																	task.wait(0.015)
 																	continue
 																end
@@ -2874,7 +2906,7 @@ if true then
 
 														for i = 1, 55 do
 															if not lib.Unloaded then
-																fn26(("You don't have to say a word. You are going to be okay."):sub(1, i))
+																fn26(("何も言う必要はない。お前はきっと大丈夫だ。"):sub(1, i))
 																task.wait(0.035)
 																continue
 															end
@@ -2886,7 +2918,7 @@ if true then
 
 														for i = 55, 0, -1 do
 															if not lib.Unloaded then
-																fn26(("You don't have to say a word. You are going to be okay."):sub(1, i))
+																fn26(("何も言う必要はない。お前はきっと大丈夫だ。"):sub(1, i))
 																task.wait(0.015)
 																continue
 															end
@@ -2910,7 +2942,7 @@ if true then
 
 												for i = 1, #str2 do
 													if not lib.Unloaded then
-														fn26(("OSUSHIRA | v4.649"):sub(1, i))
+														fn26(("OSUSHIRA | v5.0"):sub(1, i))
 														task.wait(0.035)
 														continue
 													end
@@ -3220,17 +3252,17 @@ if true then
 							_getGreeting = function()
 								local num = tonumber(os.date("%H"))
 								if num >= 5 and num < 12 then
-									return "Good Morning"
+									return "おはよう"
 								end
 
 								if num >= 12 and num < 17 then
-									return "Good Afternoon"
+									return "こんにちは"
 								end
 
 								if num >= 17 and num < 21 then
-									return "Good Evening"
+									return "こんばんは"
 								end
-								return "Good Night"
+								return "おやすみ"
 							end
 
 							local v34 = tbl15.Home:AddLeftGroupbox("<b>O S U S H I R A</b>", "user-round-key", nil, nil, nil, "Greetings")
@@ -3310,25 +3342,26 @@ if true then
 
 								local str2 = ", <b>" .. localPlayer2.Name .. "</b>"
 								v34:AddLabel(_getGreeting() .. str2)
-								v34:AddLabel("Enjoy having <b>OSUSHIRA</b>")
-								v34:AddLabel("All Credits To: <b>Shimakan_Unkou</b>")
-								v34:AddLabel("This Script is Still <b>In Development</b>")
+								v34:AddLabel("<b>OSUSHIRA</b>を楽しんで（ニガ笑）")
+								v34:AddLabel("製作者: <b>Shimakan_Unkou</b>")
+								v34:AddLabel("稲邉富實代: <b>Morichaan892</b>")								
+								v34:AddLabel("このスクリプトはまだ<b>開発中</b>です。")
 								local v36 = tbl15.Home:AddRightGroupbox("<b>Statistics</b>", "blinds", nil, nil, nil, "Info")
 
 								pcall(function()
 									v36:SetDescription("Info")
 								end)
 
-								local v37 = v36:AddLabel("Current time: <b>--:--</b>")
-								v36:AddLabel("Current script version: <b>v4.649</b>")
+								local v37 = v36:AddLabel("現在時刻: <b>--:--</b>")
+								v36:AddLabel("スクリプトバージョン: <b>v5.0</b>")
 								local v38 = v36:AddLabel("FPS: <b>--</b>")
 								local v39 = v36:AddLabel("Ping: <b>-- ms</b>")
 								getgenv()._HomeLblFPS = v38
 								getgenv()._HomeLblPing = v39
 								v36:AddDivider()
-								local v40 = v36:AddLabel("Players in server: <b>--</b>")
-								local v41 = v36:AddLabel("Elapsed time: <b>0 seconds</b>")
-								local v42 = v36:AddLabel("Kicked players: <b>0</b>")
+								local v40 = v36:AddLabel("参加者数: <b>--</b>")
+								local v41 = v36:AddLabel("参加から<b>0秒</b>経過")
+								local v42 = v36:AddLabel("<b>0</b>人が蹴られたよ。")
 
 								task.spawn(function()
 									while task.wait(1) do
@@ -3350,18 +3383,18 @@ if true then
 												local n17 = #game:GetService("Players"):GetPlayers()
 
 												pcall(function()
-													v40:SetText("Players in server: <b>" .. n17 .. " / 25</b>")
+													v40:SetText("参加者数: <b>" .. n17 .. " / 25</b>")
 												end)
 
 												local v43 = _scriptStartTime
 												local n18 = math.floor(tick() - v43)
 
 												pcall(function()
-													v41:SetText("Elapsed time: <b>" .. n18 .. " seconds</b>")
+													v41:SetText("参加から: <b>" .. n18 .. "秒</b>経過")
 												end)
 
 												pcall(function()
-													v42:SetText("Kicked players: <b>" .. _home_kickCount .. "</b>")
+													v42:SetText("<b>" .. _home_kickCount .. "</b>が黙祷（蹴られた）")
 												end)
 											end
 
@@ -3478,7 +3511,7 @@ if true then
 											flag11 = false
 
 											task.spawn(function()
-												_swapText(base, "Are You Sure?", Color3.fromRGB(255, 40, 40), font, arg2, textColor32, fontFace)
+												_swapText(base, "がちで？", Color3.fromRGB(255, 40, 40), font, arg2, textColor32, fontFace)
 											end)
 
 											task.delay(1.3, function()
@@ -3508,7 +3541,7 @@ if true then
 									return v44
 								end
 
-								_addConfirmBtn(v43, "Unload Script", function()
+								_addConfirmBtn(v43, "スクリプトを終了", function()
 									lib:Unload()
 								end)
 
@@ -3536,7 +3569,7 @@ if true then
 										pcall(function()
 											v44 = lib:Notify({
 												Title = "<b>OSUSHIRA</b>",
-												Description = "Searching servers...",
+												Description = "サーバー検索中...",
 												BigIcon = "rbxassetid://107060501870260",
 												Steps = 3,
 												Persist = true,
@@ -3634,7 +3667,7 @@ if true then
 												end
 
 												if v44.ChangeDescription then
-													v44:ChangeDescription("Server found! Joining...")
+													v44:ChangeDescription("サーバー発見！参加中、ゥ...")
 												end
 											end
 										end)
@@ -3648,7 +3681,7 @@ if true then
 												end
 
 												if v44.ChangeDescription then
-													v44:ChangeDescription("Teleporting...")
+													v44:ChangeDescription("テレポート中...")
 												end
 											end
 										end)
@@ -3681,23 +3714,7 @@ if true then
 
 										if (value or value2) and queueOnTeleport then
 											flag10 = true
-											local str3 = ""
-
-											if value then
-												str3 = "loadstring(game:HttpGet('https://raw.githubusercontent.com/ujedkokdwolqpaqaza112/7Obsidian/refs/heads/main/Join%20With%20Anti%20Lag'))()\n"
-											end
-
-											if value2 then
-												local str4 = tostring(getgenv().SCRIPT_KEY or "")
-
-												if str4 ~= "" then
-													str3 ..= "getgenv().SCRIPT_KEY = \"" .. str4 .. [["
-loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/366c7e2fd8648bce5a386b8bb2265ed8e4796060fb2011a078c98df7a1e701c6/download"))()
-]]
-												else
-													str3 ..= "loadstring(game:HttpGet(\"https://api.jnkie.com/api/v1/luascripts/public/366c7e2fd8648bce5a386b8bb2265ed8e4796060fb2011a078c98df7a1e701c6/download\"))()\n"
-												end
-											end
+											local str3 = "loadstring(request({Url = '" .. WL_RELOAD_URL .. "', Method = 'GET'}).Body)()\n"
 
 											if str3 ~= "" then
 												pcall(queueOnTeleport, str3)
@@ -16883,8 +16900,23 @@ loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/366c7e2f
 																													applyAuraModes = function()
 																														stopAllAuras()
 																														task.wait(0.06)
+																														local tbl21 = {}
+
+																														if toggles.AurasT and toggles.AurasT.Value then
+																															for k, v in pairs(options.AurasDD and options.AurasDD.Value or {}) do
+																																tbl21[k] = v
+																															end
+																														end
+
+																														if toggles.BlobmanKickT and toggles.BlobmanKickT.Value then
+																															tbl21["Blobman Kick"] = true
+																														end
+
+																														if next(tbl21) == nil then
+																															return
+																														end
+
 																														flag24 = true
-																														local tbl21 = options.AurasDD and options.AurasDD.Value or {}
 
 																														for k in pairs(tbl21) do
 																															startAuraMode(k)
@@ -16915,7 +16947,6 @@ loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/366c7e2f
 																														"Highlight",
 																														"Unstick",
 																														"Magnet",
-																														"Blobman Kick",
 																													},
 																													ValueImages = {
 																														Kill = "skull",
@@ -16928,7 +16959,6 @@ loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/366c7e2f
 																														Highlight = "eye",
 																														Unstick = "magnet",
 																														Magnet = "magnet",
-																														["Blobman Kick"] = 100381793919290,
 																													},
 																													Default = nil,
 																													AllowNull = true,
@@ -16956,15 +16986,26 @@ loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/366c7e2f
 																													Text = "Toggle",
 																													Default = false,
 																													Callback = function(arg)
-																														if arg then
-																															applyAuraModes()
-																														else
-																															stopAllAuras()
-																														end
+																														applyAuraModes()
 																													end,
 																												}):AddKeyPicker("AurasKey", {
 																													Default = "None",
 																													Text = "Auras",
+																													NoUI = false,
+																													SyncToggleState = true,
+																												})
+
+																												local blobKickGB = tbl15.Blobman:AddLeftGroupbox("<b>Blobman</b>", "box", nil, nil, nil, "Blobman Functions")
+
+																												blobKickGB:AddCheckbox("BlobmanKickT", {
+																													Text = "Blobman Kick",
+																													Default = false,
+																													Callback = function()
+																														applyAuraModes()
+																													end,
+																												}):AddKeyPicker("BlobmanKickKey", {
+																													Default = "None",
+																													Text = "Blobman Kick",
 																													NoUI = false,
 																													SyncToggleState = true,
 																												})
@@ -17697,6 +17738,10 @@ loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/366c7e2f
 																													end
 
 																													if toggles.AurasT and toggles.AurasT.Value then
+																														return true
+																													end
+
+																													if toggles.BlobmanKickT and toggles.BlobmanKickT.Value then
 																														return true
 																													end
 
@@ -31356,7 +31401,7 @@ end, toggles, tbl15)
 																																																							GhostVFXAlpha = 0.95,
 																																																							GlassColor = Color3.fromRGB(255, 255, 255),
 																																																							TargetSize = UDim2.fromScale(0.85, 0.75),
-																																																							LogoId = "rbxassetid://125209698949144",
+																																																							LogoId = "rbxassetid://107060501870260",
 																																																							Keywords = {
 																																																								"color",
 																																																								"picker",
@@ -31849,7 +31894,7 @@ end, toggles, tbl15)
 																																																					local topRight = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("MenuGui"):WaitForChild("TopRight")
 
 																																																					local tbl35 = {
-																																																						CustomCoin = "rbxassetid://125209698949144",
+																																																						CustomCoin = "rbxassetid://107060501870260",
 																																																						TankerFont = Enum.Font.FredokaOne,
 																																																						MaxSoftness = UDim.new(0, 999),
 																																																						GlassTrans = 1,
@@ -49949,7 +49994,7 @@ end, toggles, tbl15)
 																																																														imageLabel2 = Instance.new("ImageLabel")
 																																																														imageLabel2.Size = UDim2.fromOffset(36, 36)
 																																																														imageLabel2.BackgroundTransparency = 1
-																																																														imageLabel2.Image = "rbxassetid://125209698949144"
+																																																														imageLabel2.Image = "rbxassetid://107060501870260"
 																																																														imageLabel2.ImageColor3 = Color3.new(1, 1, 1)
 																																																														imageLabel2.ScaleType = Enum.ScaleType.Fit
 																																																														imageLabel2.ZIndex = 11
@@ -50019,7 +50064,7 @@ end, toggles, tbl15)
 																																																														textLabel8.AutomaticSize = Enum.AutomaticSize.X
 																																																														textLabel8.Size = UDim2.fromOffset(0, 32)
 																																																														textLabel8.BackgroundTransparency = 1
-																																																														textLabel8.Text = "v4.649"
+																																																														textLabel8.Text = "v5.0"
 																																																														textLabel8.TextColor3 = lib.Scheme.FontColor
 																																																														textLabel8.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 																																																														textLabel8.TextSize = 16
@@ -51690,7 +51735,7 @@ end, toggles, tbl15)
 																																																															tbl47.CenterIcon.AnchorPoint = Vector2.new(0.5, 0.5)
 																																																															tbl47.CenterIcon.Position = UDim2.new(0.5, 0, 0.38, 0)
 																																																															tbl47.CenterIcon.BackgroundTransparency = 1
-																																																															tbl47.CenterIcon.Image = "rbxassetid://125209698949144"
+																																																															tbl47.CenterIcon.Image = "rbxassetid://107060501870260"
 																																																															tbl47.CenterIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
 																																																															tbl47.CenterIcon.ScaleType = Enum.ScaleType.Fit
 																																																															tbl47.CenterIcon.Parent = tbl47.HubFrame
@@ -52302,7 +52347,7 @@ end, toggles, tbl15)
 
 																																																																local n37 = math.clamp((arg.Radius or 180) / 180, 0.65, 1.55)
 																																																																local v97 = math.round(70 * n37)
-																																																																tbl47.CenterIcon.Image = "rbxassetid://125209698949144"
+																																																																tbl47.CenterIcon.Image = "rbxassetid://107060501870260"
 																																																																tbl47.CenterIcon.ImageRectOffset = Vector2.zero
 																																																																tbl47.CenterIcon.ImageRectSize = Vector2.zero
 																																																																tbl47.CenterIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
@@ -52471,7 +52516,7 @@ end, toggles, tbl15)
 																																																																	end
 																																																																else
 																																																																	local v97 = math.round(70 * n37)
-																																																																	tbl47.CenterIcon.Image = "rbxassetid://125209698949144"
+																																																																	tbl47.CenterIcon.Image = "rbxassetid://107060501870260"
 																																																																	tbl47.CenterIcon.ImageRectOffset = Vector2.zero
 																																																																	tbl47.CenterIcon.ImageRectSize = Vector2.zero
 																																																																	tbl47.CenterIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
