@@ -1,30 +1,5 @@
-local WL_SHEET_ID = "1_Qoyk9qUXE-Yl5lzjQLRmKS9VoJ1eGrcYgUXkaohIaw"
-local WL_GID = "0"
 local WL_RELOAD_URL = "https://raw.githubusercontent.com/ujedkokdwolqpaqaza112/gt/refs/heads/main/a.lua"
 
-do
-	if not game:IsLoaded() then game.Loaded:Wait() end
-	local lp = game:GetService("Players").LocalPlayer
-	local req = request or http_request or (syn and syn.request)
-	local allowed = false
-	local ok, res = pcall(req, {
-		Url = ("https://docs.google.com/spreadsheets/d/%s/export?format=csv&gid=%s"):format(WL_SHEET_ID, WL_GID),
-		Method = "GET",
-	})
-	if ok and res and res.Success then
-		for line in res.Body:gmatch("[^\r\n]+") do
-			local id = line:match("^%s*\"?(%d+)\"?")
-			if id and tonumber(id) == lp.UserId then
-				allowed = true
-				break
-			end
-		end
-	end
-	if not allowed then
-		lp:Kick("Not whitelisted")
-		return
-	end
-end
 queue_on_teleport = queue_on_teleport or function() end
 cloneref = cloneref or function(o) return o end
 clonefunction = clonefunction or function(f) return f end
