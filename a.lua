@@ -2390,9 +2390,29 @@ if true then
 								local str2 = "OSUSHIRA | v5.0"
 								local tbl15 = {}
 								local flag10 = false
+								local grabCount = 0
+								local GRAB_THRESHOLD = 5
+								local QUESTION_CHANCE = 70
+								
+								task.spawn(function()
+									local isHeld = localPlayer3:WaitForChild("IsHeld", 30)
+									if not isHeld then return end
+									isHeld.Changed:Connect(function()
+										if isHeld.Value == true then
+											grabCount += 1
+										end
+									end)
+								end)
 
 								local function fn23()
 									local v34 = fn22()
+									if grabCount > GRAB_THRESHOLD and math.random(1, 100) <= QUESTION_CHANCE then
+										grabCount = 0
+										if (tonumber(os.date("%H")) or 0) < 6 then
+											return "おい" .. v34 .. "、大丈夫❓"
+										end
+										return v34 .. "、大丈夫か？"
+									end
 
 									local tbl16 = {
 										"時間が経てば全部どうでもよくなるよ。",
@@ -2408,10 +2428,6 @@ if true then
 										"明日もまたクソみたいな太陽が昇るよ。Minecraftすぎル♡",
 									}
 
-
-									if not flag10 then
-										table.insert(tbl16, 1, v34 .. "、大丈夫か？")
-									end
 
 									local n17 = tonumber(os.date("%H")) or 0
 									local v35 = os.date("%H:%M")
@@ -2430,9 +2446,6 @@ if true then
 											"せっくすする？",
 										}
 
-										if not flag10 then
-											table.insert(tbl17, 1, "おい" .. v34 .. "、大丈夫❓")
-										end
 
 										if math.random(1, 100) <= 80 then
 											tbl16 = tbl17
@@ -2458,7 +2471,7 @@ if true then
 
 									local flag11 = #tbl17 > 0 and tbl17[math.random(1, #tbl17)] or tbl16[math.random(1, #tbl16)]
 
-									if flag11:find("大丈夫か") then
+									if flag11:find("大丈夫❓") then
 										flag10 = true
 									end
 
@@ -2707,7 +2720,7 @@ if true then
 													fn26(v35)
 												end
 
-												local flag11 = v35:find("大丈夫か") ~= nil
+												local flag11 = (v35:find("大丈夫か") or v35:find("大丈夫❓")) ~= nil
 												local v37 = nil
 
 												if flag11 and not lib.Unloaded then
